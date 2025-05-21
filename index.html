@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday!</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Basic styling to make sure the page fills the screen */
+        html, body, #root {
+            height: 100%;
+            margin: 0;
+            overflow: hidden; /* Hides scrollbars, good for the confetti effect */
+        }
+        /* Custom CSS for the confetti animation */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            animation: confetti-fall 3s linear infinite;
+            bottom: -10px; /* Starts below the screen */
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        /* Font import for a nice, modern look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+        // Main App component for the birthday website
+        function App() {
+            // State to manage the current background image index for a slideshow effect
+            const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+            // State to control if the birthday song is playing
+            const [isPlaying, setIsPlaying] = React.useState(false);
+            // Ref to directly interact with the audio element (like a remote control for the song)
+            const audioRef = React.useRef(null);
+            // State for the celebratory message shown on button click
+            const [message, setMessage] = React.useState('');
+            // State to control visibility of the message box
+            const [showMessageBox, setShowMessageBox] = React.useState(false);
+
+            // Array of background image URLs. REPLACE THESE with your actual image file names!
+            // You can add more image file names here for a slideshow.
+            const backgroundImages = [
+                'disco(img).jpeg', // Your first image file
+                'birthday-bg-2.png', // Your second image file (if you have one)
+                'https://placehold.co/1920x1080/4a5568/ffffff?text=Add+More+Images', // Placeholder if you need more
+            ];
+
+            // Effect to handle the background image slideshow
+            React.useEffect(() => {
+                // If there's more than one image, set up an interval for slideshow
+                if (backgroundImages.length > 1) {
+                    const interval = setInterval(() => {
+                        setCurrentImageIndex((prevIndex) =>
+                            (prevIndex + 1) % backgroundImages.length
+                        );
+                    }, 5000); // Change image every 5 seconds (5000 milliseconds)
+                    return () => clearInterval(interval); // Clean up the interval when the component is removed
+                }
+            }, [backgroundImages.length]); // Re-run this effect if the number of images changes
+
+            // Function to toggle audio playback (play/pause)
+            const togglePlay = () => {
+                if (audioRef.current) { // Check if the audio element exists
+                    if (isPlaying) {
+                        audioRef.current.pause(); // Pause the song
+                    } else {
+                        audioRef.current.play().catch(error => {
+                            // Catch and log any errors during playback (e.g., user gesture required by browser)
+                            console.error("Error playing audio:", error);
+                            setMessage("Please click anywhere on the page to enable audio playback!");
+                            setShowMessageBox(true);
+                        });
+                    }
+                    setIsPlaying(!isPlaying); // Toggle the playing state
+                }
+            };
+
+            // Function to handle "Happy Birthday" button clicks
+            const handleBirthdayClick = (msg) => {
+                setMessage(msg); // Set the message to display
+                setShowMessageBox(true); // Show the message box
+            };
+
+            // Function to close the message box
+            const closeMessageBox = () => {
+                setShowMessageBox(false); // Hide the message box
+                setMessage(''); // Clear the message
+            };
+
+            return (
+                <div
+                    className="relative min-h-screen flex flex-col items-center justify-center text-white p-4 overflow-hidden"
+                    style={{
+                        // Apply background image dynamically from your list
+                        backgroundImage: `url(${backgroundImages[currentImageIndex]})`,
+                        backgroundSize: 'cover', // Make sure the image covers the whole area
+                        backgroundPosition: 'center', // Center the image
+                        backgroundAttachment: 'fixed', // Makes background fixed while scrolling (if content was longer)
+                        transition: 'background-image 1s ease-in-out', // Smooth transition for image change
+                    }}
+                >
+                    {/* Overlay for dark aesthetic and text readability */}
+                    <div className="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"></div>
+
+                    {/* Main content area (the central box) */}
+                    <div className="relative z-10 flex flex-col items-center justify-center p-8 rounded-xl shadow-2xl bg-gray-900 bg-opacity-80 max-w-4xl w-full text-center border border-purple-700">
+                        <h1 className="text-5xl md:text-7xl font-extrabold mb-6 text-purple-400 drop-shadow-lg animate-pulse">
+                            Happy Birthday!
+                        </h1>
+                        <p className="text-xl md:text-2xl mb-8 font-light text-gray-300">
+                            Wishing you a day filled with joy, laughter, and everything you wish for!
+                        </p>
+
+                        {/* Interactive Buttons */}
+                        <div className="flex flex-wrap justify-center gap-4 mb-8">
+                            <button
+                                onClick={() => handleBirthdayClick("Hope your day is as amazing as you are!")}
+                                className="bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-purple-300"
+                            >
+                                Send a Wish!
+                            </button>
+                            <button
+                                onClick={() => handleBirthdayClick("Cheers to another year of awesomeness!")}
+                                className="bg-gradient-to-r from-blue-500 to-teal-400 hover:from-blue-600 hover:to-teal-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300"
+                            >
+                                Celebrate!
+                            </button>
+                            <button
+                                onClick={togglePlay}
+                                className="bg-gradient-to-r from-green-500 to-lime-400 hover:from-green-600 hover:to-lime-500 text-white font-bold py-3 px-6 rounded-full shadow-lg transform hover:scale-105 transition duration-300 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
+                            >
+                                {isPlaying ? 'Pause Song' : 'Play Song'}
+                            </button>
+                        </div>
+
+                        {/* Audio Element - REPLACE 'happy-birthday-song.mp3' with your song file name! */}
+                        <audio ref={audioRef} loop>
+                            <source src="disco.mp3" type="audio/mpeg" />
+                            Your browser does not support the audio element.
+                        </audio>
+
+                        {/* Message Box (hidden by default, shown on button click) */}
+                        {showMessageBox && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                                <div className="bg-gray-800 rounded-lg p-8 shadow-xl border border-purple-600 text-center max-w-md w-full">
+                                    <p className="text-2xl font-semibold text-white mb-6">{message}</p>
+                                    <button
+                                        onClick={closeMessageBox}
+                                        className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-5 rounded-full transition duration-300"
+                                    >
+                                        Got It!
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Footer/Signature */}
+                        <p className="text-md text-gray-500 mt-8">
+                            Made with ❤️ for you!
+                        </p>
+                    </div>
+
+                    {/* Confetti effect (simple CSS animation) */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                        {Array.from({ length: 50 }).map((_, i) => (
+                            <div
+                                key={i}
+                                className="confetti"
+                                style={{
+                                    left: `${Math.random() * 100}vw`,
+                                    animationDelay: `${Math.random() * 2}s`,
+                                    backgroundColor: `hsl(${Math.random() * 360}, 100%, 70%)`,
+                                    opacity: Math.random() + 0.5,
+                                    transform: `scale(${Math.random() * 0.8 + 0.2})`,
+                                }}
+                            ></div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+
+        // This line tells React to put your "App" (your website) into the 'root' div
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+</body>
+</html>
